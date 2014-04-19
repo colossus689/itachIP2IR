@@ -9,5 +9,18 @@
 #import <Foundation/Foundation.h>
 
 @interface itachIP2IR : NSObject
+{
+    int my_socket;
+}
+//ip commands are forwarded to
+@property (nonatomic, strong) NSString* itachIP;
+//defaults to 4998
+@property (nonatomic, strong) NSString* itachPort;
+//mutable dictionary to load with your custom IR commands
+@property (nonatomic, strong) NSMutableDictionary*  commandList;
+
++(id)sharedInstance;
+//send itach command with key of your command in commandList
+-(void)sendCommand:(NSString*)command;
 
 @end
