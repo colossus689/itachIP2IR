@@ -18,6 +18,10 @@
 #   define DLog(...)
 #endif
 
+/*http://www.globalcache.com/files/docs/API-iTach.pdf*/
+#define ITACH_BROADCAST_PORT 9131
+#define ITACH_BROADCAST_GROUP 239.255.250.250
+
 @implementation itachIP2IR
 
 +(id)sharedInstance
@@ -107,6 +111,87 @@
     });
 }
 
+-(void)discover
+{
+    // descriptor number for the socket we'll use
+    int serverSocket;
+    
+    // socket internet address data for the server
+    struct sockaddr_in serverData;
+    
+    // socket internet address data for a client
+    struct sockaddr_in clientData;
+    int clientDataLength;
+    
+    // buffer for incoming data
+    char buffer[1024];
+    
+    bool isConnected;
+    
+    int bytesReceived;
+    
+    /*
+     * Set up the server
+     */
+    bzero( &serverData, sizeof( serverData ) );
+    // use the Internet Address Family (IPv4)
+    serverData.sin_family = AF_INET;
+    // accept connections from a client on broadcast
+    serverData.sin_addr.s_addr = htonl( INADDR_BROADCAST );
+    // set the port for incoming packets
+    serverData.sin_port = htons( ITACH_BROADCAST_PORT );
+    
+    
+    // zero-out the client address struct too
+    bzero( &clientData, sizeof( clientData ) );
+    
+    /*
+     * Open a UDP (datagram) socket
+     * (and save the descriptor so we can refer to it in the future)
+     */
+    // the third argument is for setting different protocols on sockets,
+    // we don't need to worry about this and are using 0
+    // PF_INET means the internet protocol family
+    serverSocket = socket( PF_INET, SOCK_DGRAM, 0 );
+    
+    // bind the socket to the address
+    int bindResult = bind( serverSocket,
+                          (struct sockaddr *)&serverData,
+                          sizeof( serverData ) );
+    if ( bindResult < 0 ) {
+        printf( "Error: Unable to bind socket" );
+        close( serverSocket );
+    } else {
+        printf( "Server Running\n" );
+        
+        isConnected = true;
+        while ( isConnected ) {
+            
+            // it's important to specify this size first
+            clientDataLength = sizeof( clientData );
+            
+            // receive any data from a client
+            bytesReceived = recvfrom( serverSocket, buffer, BUF_SIZE, 0, // extra flags
+                                     (struct sockaddr *)&clientData, &clientDataLength );
+            
+            // terminate the bytes as a string and print the result
+            buffer[bytesReceived]= '\0';
+            char *clientAddress = inet_ntoa( clientData.sin_addr );
+            printf( "Received:\n%s\nfrom: %s:%d\n",
+                   buffer,
+                   clientAddress,
+                   ntohs( clientData.sin_port ) );
+            
+            // reply
+            char replyText[] = "Datagram received!";
+            strncpy( buffer, replyText, strlen( replyText ) );
+            printf( "Replying with: %s\n", buffer );
+            
+            sendto( serverSocket, buffer, strlen( replyText ), 0, // extra flags
+                   (struct sockaddr *)&clientData, clientDataLength );
+        }
+        close( serverSocket );
+    }}
 
 
 -(void)cleanup

@@ -7,6 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+@protocol itachIP2IRDelegate
+-(NSString*)discoveredItachWithIp;
+@end
 
 @interface itachIP2IR : NSObject
 {
@@ -23,4 +26,9 @@
 //send itach command with key of your command in commandList
 -(void)sendCommand:(NSString*)command;
 
+//calls delegate method didDiscover upon itach discovery
+-(void)discover;
+
+
+@property (nonatomic, weak) id<itachIP2IRDelegate> delegate;
 @end
