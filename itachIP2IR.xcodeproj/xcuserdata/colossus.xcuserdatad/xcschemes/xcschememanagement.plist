@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>itachIP2IR_OSx.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
@@ -18,6 +23,16 @@
 			<true/>
 		</dict>
 		<key>7858969019031D53007039AB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>785896B2190343F9007039AB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>785896C3190343FA007039AB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
