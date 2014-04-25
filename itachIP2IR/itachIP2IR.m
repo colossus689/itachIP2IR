@@ -38,7 +38,18 @@
 
 - (void)sendCommand: (NSString *)request {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        if(!_commandList){
+            NSLog(@"[itachIP2IR] ERROR: command list not set");
+            return;
+        }
+            
         
+        NSString *requestStrFrmt = [_commandList objectForKey:request];
+        if(!requestStrFrmt){
+            NSLog(@"[itachIP2IR] no key for %@",request);
+            return;
+        }
+
         struct addrinfo *servInfo;
 
         struct addrinfo hints;
@@ -76,9 +87,6 @@
         }
         
         NSError *error;
-        
-        NSString *requestStrFrmt = request;
-        
         NSData *requestData = [requestStrFrmt dataUsingEncoding:NSUTF8StringEncoding];
         
         
