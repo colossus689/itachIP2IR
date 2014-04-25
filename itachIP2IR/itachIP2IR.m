@@ -21,9 +21,10 @@
 /*http://www.globalcache.com/files/docs/API-iTach.pdf*/
 #define ITACH_BROADCAST_PORT 9131
 #define ITACH_BROADCAST_GROUP 239.255.250.250
+#define BUF_SIZE 1024
 
 @implementation itachIP2IR
-
+@synthesize itachIP;
 +(id)sharedInstance
 {
     static itachIP2IR *sharedItach = nil;
@@ -42,21 +43,21 @@
             NSLog(@"[itachIP2IR] ERROR: command list not set");
             return;
         }
-            
+        
         
         NSString *requestStrFrmt = [_commandList objectForKey:request];
         if(!requestStrFrmt){
             NSLog(@"[itachIP2IR] no key for %@",request);
             return;
         }
-
+        
         struct addrinfo *servInfo;
-
+        
         struct addrinfo hints;
         memset(&hints, 0, sizeof hints);
         hints.ai_family = PF_INET;
         hints.ai_socktype = SOCK_STREAM;
-        int res = getaddrinfo([_itachIP UTF8String], [_itachPort UTF8String], &hints, &servInfo);
+        int res = getaddrinfo([itachIP UTF8String], [_itachPort UTF8String], &hints, &servInfo);
         
         if (res != 0) {
             //                EAI_ADDRFAMILY
@@ -83,6 +84,8 @@
         res = connect(my_socket, addr, sizeof(struct sockaddr));
         if (res < 0) {
             NSLog(@"error no %d",errno);
+            close(my_socket);
+            my_socket = 0;
             return;
         }
         
@@ -97,9 +100,9 @@
         }
         send(my_socket, [jsonData bytes], [jsonData length], 0);
         
-
+        
         DLog(@"[itachIP2IR] sent %lu byte message",(unsigned long)[jsonData length]);
-
+        
         //Get data back
         char buffer[5000];
         int numBytes = 0;
@@ -116,6 +119,7 @@
         DLog(@"[itachIP2IR] Received : %@",[NSString stringWithCString:ptr encoding:NSUTF8StringEncoding]);
         
         close(my_socket);
+        my_socket = 0;
     });
 }
 
